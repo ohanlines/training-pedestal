@@ -66,7 +66,8 @@
   {:name ::get-params
    :enter
    (fn [{:keys [request] :as context}]
-     (let [name (get-in request [:params "username"])]
+     (let [name (get-in request [:params "username"])
+           _ (println "keys : " (:body request))]
        (assoc context :username name)))
    })
 
@@ -102,6 +103,6 @@
   #{
     ;; ["/greet" :get hello-world :route-name :greet]
     ;; ["/greet" :get coba :route-name :greet]
-    ;; ["/greet" :get [get-params hello-interceptor] :route-name :greet-get]
+    ["/greet" :get [hello-interceptor] :route-name :greet-get]
     ["/greet" :post [get-params hello-interceptor] :route-name :greet-post]
     })
