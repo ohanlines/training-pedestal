@@ -102,5 +102,6 @@
   #{
     ;; ["/greet" :get hello-world :route-name :greet]
     ;; ["/greet" :get coba :route-name :greet]
+    ;; ["/greet" :get [get-params hello-interceptor] :route-name :greet-get]
     ["/greet" :post [get-params hello-interceptor] :route-name :greet-post]
     })
