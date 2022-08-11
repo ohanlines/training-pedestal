@@ -54,8 +54,8 @@
      [:div
       "Masukin nama lo: "
       (form/form-to
-      ;;  [:post "/greet"] ;; method post
-       [:get "/greet"]
+       [:post "/greet"] ;; method post
+      ;;  [:get "/greet"]
        [:input {:type "text"
                 :id   "name"
                 :name "username"}]
@@ -74,29 +74,29 @@
   {:name ::say-hello
    :enter
    (fn [{:keys [request username] :as context}]
-    ;;  (let [validate  (partial validate-name {:username username})
-    ;;        name      (validate :value)
-    ;;        error     (validate :error)
-    ;;        hello     (-> (hiccup-hello name error)
-    ;;                      common-respond)]
-    ;;    (assoc context :response hello))
-     
-     (let [init-name (get-in request [:query-params :usernames])
-           validate  (partial validate-name {:username init-name})
+     (let [validate  (partial validate-name {:username username})
            name      (validate :value)
            error     (validate :error)
            hello     (-> (hiccup-hello name error)
                          common-respond)]
-       (assoc context :respose hello)
-       )
+       (assoc context :response hello))
+     
+    ;;  (let [init-name (get-in request [:query-params :usernames])
+    ;;        validate  (partial validate-name {:username init-name})
+    ;;        name      (validate :value)
+    ;;        error     (validate :error)
+    ;;        hello     (-> (hiccup-hello name error)
+    ;;                      common-respond)]
+    ;;    (assoc context :respose hello)
+    ;;    )
      )})
 
-(defn hello-world [request]
-  {:status 200 :body "Hello, world!"})
+;; (defn hello-world [request]
+;;   {:status 200 :body "Hello, world!"})
 
-(defn coba [request]
-  (-> (hiccup-hello "ohan" nil)
-      common-respond))
+;; (defn coba [request]
+;;   (-> (hiccup-hello "ohan" nil)
+;;       common-respond))
 
 (def routes
   #{
