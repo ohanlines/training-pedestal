@@ -1,8 +1,10 @@
 (ns routes
-  (:require [hiccup.page :refer [html5]]
+  (:require [io.pedestal.http :as http]
+            [io.pedestal.http.body-params :as body-params]
+            [io.pedestal.http.ring-middlewares :as http-middlewares]
+            [hiccup.page :refer [html5]]
             [hiccup.form :as form]
-            [validate :refer [validate-name]]
-            ))
+            [validate :refer [validate-name]]))
 
 (def debug
   {:name ::debug
@@ -22,8 +24,7 @@
            ;; res     {:status 200 :body ["hellow from debug"]}
            _  (println "contextnya ini bro: " context " end context")
            __ (println "requestnya ini bro: " request " end request")]
-       context))
-   })
+       context))})
 
 ;; === assets ===
 (defn hiccup-common [& body]
@@ -36,40 +37,39 @@
 
 (defn error-component [err]
   (when (not (nil? err))
-    [:p 
+    [:p
      [:span {:style "color:red"}
       (:username err)]]))
 
-;; === get greet ===
+;; === sistem ===
 (defn common-respond [body]
   {:status 200
    :headers {"Content-Type" "text/html"}
    :body body})
 
-(defn hiccup-hello [name error]
-  (let [name (:username name)]
+(defn hiccup-hello [uname error]
+  (let [name (:username uname)]
     (hiccup-common
-     [:h1 (str "Hello, " (if error "Folks" name) \!)]
+     [:h1 (str "Hello, " (if error "Folks" name) \! " " uname)]
      (error-component error)
      [:div
       "Masukin nama lo: "
       (form/form-to
-       [:post "/greet"] ;; method post
-      ;;  [:get "/greet"]
+       [:post "/greet"]
        [:input {:type "text"
                 :id   "name"
                 :name "username"}]
-       (form/submit-button "Enter"))])
-    ))
+       (form/submit-button "Enter"))])))
 
 (def get-params
   {:name ::get-params
    :enter
    (fn [{:keys [request] :as context}]
      (let [name (get-in request [:params "username"])
-           _ (println "keys : " (:body request))]
-       (assoc context :username name)))
-   })
+          ;;  _ (println "keys : " (:body request))
+           __ (println "requestnya: " request)
+           ]
+       (assoc context :username name)))})
 
 (def hello-interceptor
   {:name ::say-hello
@@ -80,29 +80,12 @@
            error     (validate :error)
            hello     (-> (hiccup-hello name error)
                          common-respond)]
-       (assoc context :response hello))
-     
-    ;;  (let [init-name (get-in request [:query-params :usernames])
-    ;;        validate  (partial validate-name {:username init-name})
-    ;;        name      (validate :value)
-    ;;        error     (validate :error)
-    ;;        hello     (-> (hiccup-hello name error)
-    ;;                      common-respond)]
-    ;;    (assoc context :respose hello)
-    ;;    )
-     )})
+       (assoc context :response hello)))})
 
-;; (defn hello-world [request]
-;;   {:status 200 :body "Hello, world!"})
-
-;; (defn coba [request]
-;;   (-> (hiccup-hello "ohan" nil)
-;;       common-respond))
+(def common-interceptors [(body-params/body-params) http/html-body (http-middlewares/multipart-params)])
 
 (def routes
-  #{
-    ;; ["/greet" :get hello-world :route-name :greet]
-    ;; ["/greet" :get coba :route-name :greet]
-    ["/greet" :get [hello-interceptor] :route-name :greet-get]
-    ["/greet" :post [get-params hello-interceptor] :route-name :greet-post]
+  #{["/greet" :get [hello-interceptor] :route-name :greet-get]
+    ["/greet" :post (conj common-interceptors get-params hello-interceptor) :route-name :greet-post]
+    ;; ["/greet" :post [get-params hello-interceptor] :route-name :greet-post]
     })
